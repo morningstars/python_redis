@@ -323,4 +323,54 @@ zunionstore destination numkeys key [weights 权重值] [AGGREGATE SUM|MIN|MAX]
 ZINTERSTORE destination numkeys key1 key2 WEIGHTS weight AGGREGATE SUM|MIN|MAX
 # 先计算权重 再聚合
 zinterstore z_inter 2 z1 z2 weights 0.5 0.3 aggregate max
+
+"""
+
+
+"""
+-------------------  python使用pipeline()与execute()批量进行批量操作  -------------------
+减少redis数据库的io操作 提升数据库的性能
+# 创建连接池并连接到redis
+pool = redis.ConnectionPool(host = '192.168.153.130',db=0,port=6379)
+r = redis.Redis(connection_pool=pool)
+
+# 第一组 
+pipe = r.pipeline() 
+pipe.set('fans',50) 
+pipe.incr('fans') 
+pipe.incrby('fans',100) 
+pipe.execute()
+
+# 第二组 
+pipe.get('fans') 
+pipe.get('pwd')  
+# [b'151', b'123'] 
+result = pipe.execute()
+
+"""
+
+"""
+-------------------  redis的事务  -------------------
+1、MULTI # 开启事务 
+2、命令1 # 执行命令 
+3、命令2 ... ...
+4、EXEC # 提交到数据库执行 
+4、DISCARD # 取消事务
+
+# 开启事务
+
+127.0.0.1:6379> MULTI 
+OK # 命令1入队列
+
+127.0.0.1:6379> INCR n1 
+QUEUED # 命令2入队列
+
+127.0.0.1:6379> INCR n2 
+QUEUED # 提交到数据库执行
+
+127.0.0.1:6379> EXEC
+
+1) (integer) 1
+2) (integer) 1
+
 """
